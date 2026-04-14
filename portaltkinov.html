@@ -160,6 +160,27 @@
       border-color: rgba(255, 255, 255, 0.45);
     }
 
+    .contact-status {
+      margin-top: 1rem;
+      font-size: 0.9rem;
+    }
+
+    .contact-status--success {
+      color: rgba(233, 255, 239, 0.95);
+    }
+
+    .contact-status--error {
+      color: rgba(255, 214, 214, 0.95);
+    }
+
+    .sr-only-field {
+      position: absolute;
+      left: -9999px;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+    }
+
     @media (max-width: 640px) {
       .hero-logo-wrap {
         width: 100%;
@@ -694,30 +715,60 @@
             <div class="mb-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
               <div>
                 <label for="contactName" class="sr-only">Nombre</label>
-                <input id="contactName" type="text" placeholder="Tu nombre" class="contact-input">
+                <input
+                  id="contactName"
+                  name="name"
+                  type="text"
+                  placeholder="Tu nombre"
+                  class="contact-input"
+                  required
+                >
               </div>
               <div>
                 <label for="contactEmail" class="sr-only">Correo</label>
-                <input id="contactEmail" type="email" placeholder="correo@empresa.com" class="contact-input">
+                <input
+                  id="contactEmail"
+                  name="email"
+                  type="email"
+                  placeholder="correo@empresa.com"
+                  class="contact-input"
+                  required
+                >
               </div>
             </div>
             <div class="mb-4">
               <label for="contactMsg" class="sr-only">Mensaje</label>
               <textarea
                 id="contactMsg"
+                name="message"
                 placeholder="Cuéntanos sobre tu proyecto..."
                 rows="3"
                 class="contact-input resize-none"
+                required
               ></textarea>
             </div>
+            <div class="sr-only-field" aria-hidden="true">
+              <label for="contactWebsite">No llenar este campo</label>
+              <input
+                id="contactWebsite"
+                name="website"
+                type="text"
+                tabindex="-1"
+                autocomplete="off"
+              >
+            </div>
             <button
+              id="contactSubmit"
               type="submit"
               class="rounded-lg bg-white px-8 py-3.5 font-semibold text-tk-blue shadow-lg transition-all hover:bg-tk-silver"
             >
               Enviar mensaje
             </button>
-            <p id="formSuccess" class="mt-4 hidden text-sm text-white/80">
+            <p id="formSuccess" class="contact-status contact-status--success hidden">
               Mensaje enviado. Nos pondremos en contacto contigo pronto.
+            </p>
+            <p id="formError" class="contact-status contact-status--error hidden">
+              No pudimos enviar tu mensaje. Intenta de nuevo en unos minutos.
             </p>
           </form>
         </div>
@@ -781,6 +832,8 @@
   </footer>
 
   <script>
+    const FORM_ENDPOINT = "https://prod-12.northcentralus.logic.azure.com:443/workflows/7f5655923ace42b1bf9330cb687afd86/triggers/When_an_HTTP_request_is_received/paths/invoke?api-version=2016-10-01&sp=%2Ftriggers%2FWhen_an_HTTP_request_is_received%2Frun&sv=1.0&sig=mUQg2ji4DeTVxD9urYAYprudNT_qRRLt4lhMdaYw4mg";
+
     document.addEventListener("DOMContentLoaded", () => {
       const observer = new IntersectionObserver((entries) => {
         entries.forEach((entry) => {
@@ -824,16 +877,63 @@
 
       const contactForm = document.getElementById("contactForm");
       const formSuccess = document.getElementById("formSuccess");
+      const formError = document.getElementById("formError");
+      const contactSubmit = document.getElementById("contactSubmit");
 
-      if (contactForm && formSuccess) {
-        contactForm.addEventListener("submit", (event) => {
+      if (contactForm && formSuccess && formError && contactSubmit) {
+        contactForm.addEventListener("submit", async (event) => {
           event.preventDefault();
-          formSuccess.classList.remove("hidden");
-          contactForm.reset();
+          formSuccess.classList.add("hidden");
+          formError.classList.add("hidden");
 
-          window.setTimeout(() => {
-            formSuccess.classList.add("hidden");
-          }, 4000);
+          const formData = new FormData(contactForm);
+          const payload = {
+            name: String(formData.get("name") || "").trim(),
+            email: String(formData.get("email") || "").trim(),
+            message: String(formData.get("message") || "").trim(),
+            website: String(formData.get("website") || "").trim(),
+            source: window.location.hostname,
+            submittedAt: new Date().toISOString()
+          };
+
+          if (payload.website) {
+            contactForm.reset();
+            formSuccess.classList.remove("hidden");
+            return;
+          }
+
+          if (!FORM_ENDPOINT) {
+            formError.textContent = "Falta configurar la URL de Azure Logic Apps para este formulario.";
+            formError.classList.remove("hidden");
+            return;
+          }
+
+          contactSubmit.disabled = true;
+          contactSubmit.textContent = "Enviando...";
+
+          try {
+            const response = await fetch(FORM_ENDPOINT, {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json"
+              },
+              body: JSON.stringify(payload)
+            });
+
+            if (!response.ok) {
+              throw new Error(`HTTP ${response.status}`);
+            }
+
+            contactForm.reset();
+            formSuccess.classList.remove("hidden");
+          } catch (error) {
+            console.error("Error sending contact form", error);
+            formError.textContent = "No pudimos enviar tu mensaje. Intenta de nuevo en unos minutos.";
+            formError.classList.remove("hidden");
+          } finally {
+            contactSubmit.disabled = false;
+            contactSubmit.textContent = "Enviar mensaje";
+          }
         });
       }
 
