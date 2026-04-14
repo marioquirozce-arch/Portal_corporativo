@@ -181,6 +181,56 @@
       overflow: hidden;
     }
 
+    .whatsapp-float {
+      position: fixed;
+      right: 1.25rem;
+      bottom: 1.25rem;
+      z-index: 60;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.95rem 1.1rem;
+      border-radius: 999px;
+      background: linear-gradient(135deg, #1f9d55, #25d366);
+      color: #ffffff;
+      text-decoration: none;
+      box-shadow: 0 20px 45px rgba(20, 85, 48, 0.28);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .whatsapp-float:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 24px 52px rgba(20, 85, 48, 0.34);
+    }
+
+    .whatsapp-float__icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 2.6rem;
+      height: 2.6rem;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.16);
+    }
+
+    .whatsapp-float__text {
+      display: flex;
+      flex-direction: column;
+      line-height: 1.1;
+    }
+
+    .whatsapp-float__label {
+      font-size: 0.72rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      opacity: 0.8;
+    }
+
+    .whatsapp-float__number {
+      font-size: 0.96rem;
+      font-weight: 700;
+    }
+
     @media (max-width: 640px) {
       .hero-logo-wrap {
         width: 100%;
@@ -193,6 +243,16 @@
       .hero-logo-note {
         white-space: normal;
         text-align: center;
+      }
+
+      .whatsapp-float {
+        right: 1rem;
+        bottom: 1rem;
+        padding: 0.9rem;
+      }
+
+      .whatsapp-float__text {
+        display: none;
       }
     }
   </style>
@@ -830,6 +890,22 @@
       </div>
     </div>
   </footer>
+
+  <a
+    href="https://wa.me/525652245177?text=Hola%2C%20quiero%20informaci%C3%B3n%20sobre%20sus%20soluciones%20tecnol%C3%B3gicas."
+    class="whatsapp-float"
+    target="_blank"
+    rel="noopener noreferrer"
+    aria-label="Contactar por WhatsApp a TKINOV"
+  >
+    <span class="whatsapp-float__icon">
+      <i data-lucide="message-circle-more" style="width: 22px; height: 22px;"></i>
+    </span>
+    <span class="whatsapp-float__text">
+      <span class="whatsapp-float__label">WhatsApp</span>
+      <span class="whatsapp-float__number">+52 56 5224 5177</span>
+    </span>
+  </a>
 
   <script>
     const FORM_ENDPOINT = "https://prod-12.northcentralus.logic.azure.com:443/workflows/7f5655923ace42b1bf9330cb687afd86/triggers/When_an_HTTP_request_is_received/paths/invoke?api-version=2016-10-01&sp=%2Ftriggers%2FWhen_an_HTTP_request_is_received%2Frun&sv=1.0&sig=mUQg2ji4DeTVxD9urYAYprudNT_qRRLt4lhMdaYw4mg";
