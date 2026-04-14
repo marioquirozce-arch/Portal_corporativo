@@ -1,0 +1,9 @@
+.DS_Store
+
+# Documentos de trabajo que no forman parte del portal
+*.doc
+*.docx
+*.pdf
+
+# Archivos temporales del sistema
+Thumbs.db
